@@ -1,8 +1,63 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>NPCVerse</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+            background-color: #f5f5f5;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: white;
+            margin-bottom: 12px;
+            padding: 12px 15px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px #ccc;
+        }
+        form input, form button {
+            padding: 8px;
+            margin: 5px 0;
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        form button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        form button:hover {
+            background-color: #0056b3;
+        }
+        #interaction-section {
+            margin-top: 40px;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px #ccc;
+        }
+        #response {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+    </style>
 </head>
 <body>
     <h1>NPCs Registrados</h1>
@@ -10,49 +65,103 @@
     <ul id="npc-list">
         {% for npc in npcs %}
         <li>
-            <strong>{{ npc.name }}</strong> - {{ npc.role }} - {{ npc.location }} <br>
+            <strong>{{ npc.name }}</strong> - {{ npc.role }} - {{ npc.location }}<br />
             <em>{{ npc.personality }}</em> | Status: {{ npc.status }}
         </li>
+        {% else %}
+        <li>Nenhum NPC cadastrado ainda.</li>
         {% endfor %}
     </ul>
 
-    <hr>
+    <hr />
 
     <h2>Cadastrar Novo NPC</h2>
     <form id="npc-form">
-        <input type="text" name="name" placeholder="Nome" required><br>
-        <input type="text" name="role" placeholder="Função" required><br>
-        <input type="text" name="location" placeholder="Localização" required><br>
-        <input type="text" name="personality" placeholder="Personalidade" required><br>
-        <input type="text" name="status" placeholder="Status (ativo/inativo)" required><br>
+        <input type="text" name="name" placeholder="Nome" required />
+        <input type="text" name="role" placeholder="Função" required />
+        <input type="text" name="location" placeholder="Localização" required />
+        <input type="text" name="personality" placeholder="Personalidade" required />
+        <input type="text" name="status" placeholder="Status (ativo/inativo)" required />
         <button type="submit">Cadastrar</button>
     </form>
+
+    <hr />
+
+    <div id="interaction-section">
+        <h2>Interagir com NPC</h2>
+        <form id="interact-form">
+            <select name="to" required>
+                <option value="" disabled selected>Selecione um NPC</option>
+                {% for npc in npcs %}
+                <option value="{{ npc.name }}">{{ npc.name }}</option>
+                {% endfor %}
+            </select>
+            <input type="text" name="message" placeholder="Sua mensagem" required />
+            <input type="text" name="from" placeholder="Seu nome (opcional)" />
+            <button type="submit">Enviar</button>
+        </form>
+        <div id="response"></div>
+    </div>
 
     <script>
         document.getElementById("npc-form").addEventListener("submit", async (e) => {
             e.preventDefault();
             const form = e.target;
             const data = {
-                name: form.name.value,
-                role: form.role.value,
-                location: form.location.value,
-                personality: form.personality.value,
-                status: form.status.value
+                name: form.name.value.trim(),
+                role: form.role.value.trim(),
+                location: form.location.value.trim(),
+                personality: form.personality.value.trim(),
+                status: form.status.value.trim()
             };
 
-            const response = await fetch("/register_npc", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(data)
-            });
+            try {
+                const response = await fetch("/register_npc", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
 
-            if (response.ok) {
-                alert("NPC cadastrado com sucesso!");
-                window.location.reload();
-            } else {
-                alert("Erro ao cadastrar NPC.");
+                if (response.ok) {
+                    alert("NPC cadastrado com sucesso!");
+                    window.location.reload();
+                } else {
+                    const err = await response.json();
+                    alert("Erro ao cadastrar NPC: " + (err.message || JSON.stringify(err)));
+                }
+            } catch (error) {
+                alert("Erro na comunicação com o servidor.");
+            }
+        });
+
+        document.getElementById("interact-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const data = {
+                to: form.to.value,
+                message: form.message.value.trim(),
+                from: form.from.value.trim() || "Usuário"
+            };
+
+            const responseDiv = document.getElementById("response");
+            responseDiv.textContent = "Carregando resposta...";
+
+            try {
+                const response = await fetch("/interact", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    const json = await response.json();
+                    responseDiv.textContent = `Resposta de ${json.from} para ${json.to}:\n${json.response}`;
+                } else {
+                    const err = await response.json();
+                    responseDiv.textContent = "Erro: " + (err.error || JSON.stringify(err));
+                }
+            } catch (error) {
+                responseDiv.textContent = "Erro na comunicação com o servidor.";
             }
         });
     </script>

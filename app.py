@@ -5,13 +5,10 @@ import os
 import pymysql
 from sentence_transformers import SentenceTransformer
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import PointStruct
-import uuid
+from qdrant_client.http.models import PointStruct, Filter, FieldCondition, MatchValue
 
-# Load .env
 load_dotenv()
 
-# Flask app
 app = Flask(__name__)
 CORS(app)
 
@@ -36,8 +33,6 @@ def get_db_connection():
         cursorclass=pymysql.cursors.DictCursor
     )
 
-
-# Home: lista os NPCs no HTML
 @app.route('/')
 def index():
     conn = get_db_connection()
@@ -47,12 +42,11 @@ def index():
     conn.close()
     return render_template("index.html", npcs=npcs)
 
-# Rota para registrar NPC
 @app.route('/register_npc', methods=['POST'])
 def register_npc():
     data = request.json
 
-    # 1. Salva no MySQL
+    # Salva NPC no MySQL
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
@@ -63,29 +57,26 @@ def register_npc():
     npc_id = cursor.lastrowid
     conn.close()
 
-    # 2. Salva personalidade inicial no Qdrant
+    # Salva vetor de personalidade no Qdrant, usando npc_id numérico como ID do ponto para manter relação
     personality_text = data['personality']
     vector = model.encode(personality_text).tolist()
-    memory_id = str(uuid.uuid4())
 
+    point = PointStruct(
+        id=npc_id,  # usar npc_id numérico para manter consistência
+        vector=vector,
+        payload={
+            "npc_id": npc_id,
+            "type": "personality",
+            "text": personality_text
+        }
+    )
     qdrant.upsert(
         collection_name=collection_name,
-        points=[
-            PointStruct(
-                id=memory_id,
-                vector=vector,
-                payload={
-                    "npc_id": npc_id,
-                    "type": "personality",
-                    "text": personality_text
-                }
-            )
-        ]
+        points=[point]
     )
 
     return jsonify({"message": "NPC registrado com sucesso"}), 201
 
-# Rota opcional para retornar NPCs em JSON (ex: para frontend React futuramente)
 @app.route('/discover_npcs', methods=['GET'])
 def discover_npcs():
     conn = get_db_connection()
@@ -95,6 +86,58 @@ def discover_npcs():
     conn.close()
     return jsonify(npcs)
 
-# Iniciar o app
+@app.route('/interact', methods=['POST'])
+def interact():
+    data = request.json
+    npc_name = data.get("to")
+    message = data.get("message")
+    from_agent = data.get("from")
+
+    if not npc_name or not message:
+        return jsonify({"error": "Campos 'to' e 'message' são obrigatórios"}), 400
+
+    # Busca NPC no banco
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM npcs WHERE name = %s", (npc_name,))
+    npc = cursor.fetchone()
+    conn.close()
+
+    if not npc:
+        return jsonify({"error": f"NPC '{npc_name}' não encontrado"}), 404
+
+    # Codifica mensagem para vetor
+    query_vector = model.encode(message).tolist()
+
+    # Busca vetor mais parecido no Qdrant filtrando pelo npc_id
+    search_result = qdrant.search(
+        collection_name=collection_name,
+        query_vector=query_vector,
+        limit=1,
+        query_filter=Filter(
+            must=[
+                FieldCondition(key="npc_id", match=MatchValue(value=npc['id']))
+            ]
+        )
+    )
+
+    if not search_result:
+        return jsonify({
+            "from": npc_name,
+            "to": from_agent,
+            "emotion": "neutro",
+            "response": "Não tenho informações suficientes para responder."
+        })
+
+    top_match = search_result[0]
+    response_text = f"{npc_name} lembra: \"{top_match.payload.get('text', '')}\" (similaridade {top_match.score:.2f})"
+
+    return jsonify({
+        "from": npc_name,
+        "to": from_agent,
+        "emotion": "neutro",
+        "response": response_text
+    })
+
 if __name__ == '__main__':
     app.run(debug=True)
