@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>NPCVerse</title>
+</head>
+<body>
+    <h1>NPCs Registrados</h1>
+
+    <ul id="npc-list">
+        {% for npc in npcs %}
+        <li>
+            <strong>{{ npc.name }}</strong> - {{ npc.role }} - {{ npc.location }} <br>
+            <em>{{ npc.personality }}</em> | Status: {{ npc.status }}
+        </li>
+        {% endfor %}
+    </ul>
+
+    <hr>
+
+    <h2>Cadastrar Novo NPC</h2>
+    <form id="npc-form">
+        <input type="text" name="name" placeholder="Nome" required><br>
+        <input type="text" name="role" placeholder="Função" required><br>
+        <input type="text" name="location" placeholder="Localização" required><br>
+        <input type="text" name="personality" placeholder="Personalidade" required><br>
+        <input type="text" name="status" placeholder="Status (ativo/inativo)" required><br>
+        <button type="submit">Cadastrar</button>
+    </form>
+
+    <script>
+        document.getElementById("npc-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const data = {
+                name: form.name.value,
+                role: form.role.value,
+                location: form.location.value,
+                personality: form.personality.value,
+                status: form.status.value
+            };
+
+            const response = await fetch("/register_npc", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                alert("NPC cadastrado com sucesso!");
+                window.location.reload();
+            } else {
+                alert("Erro ao cadastrar NPC.");
+            }
+        });
+    </script>
+</body>
+</html>
