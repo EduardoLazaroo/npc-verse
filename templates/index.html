@@ -1,169 +1,183 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8" />
-    <title>NPCVerse</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 30px auto;
-            padding: 0 20px;
-            background-color: #f5f5f5;
-        }
-        h1, h2 {
-            color: #333;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            background: white;
-            margin-bottom: 12px;
-            padding: 12px 15px;
-            border-radius: 5px;
-            box-shadow: 0 1px 3px #ccc;
-        }
-        form input, form button {
-            padding: 8px;
-            margin: 5px 0;
-            width: 100%;
-            box-sizing: border-box;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
-        form button {
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        form button:hover {
-            background-color: #0056b3;
-        }
-        #interaction-section {
-            margin-top: 40px;
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 1px 3px #ccc;
-        }
-        #response {
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #e9ecef;
-            border-radius: 4px;
-            white-space: pre-wrap;
-        }
-    </style>
+<meta charset="UTF-8" />
+<title>NPCVerse</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 0 15px;
+    background: #f5f5f5;
+    color: #333;
+  }
+  h1, h2 {
+    margin-bottom: 12px;
+  }
+  ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  li {
+    background: #fff;
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px #ccc;
+  }
+  form {
+    background: #fff;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px #ccc;
+    margin-bottom: 25px;
+  }
+  input, select, button {
+    display: block;
+    width: 100%;
+    margin: 6px 0;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  button {
+    background: #007BFF;
+    color: #fff;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  button:hover {
+    background: #0056b3;
+  }
+  #response {
+    background: #e9ecef;
+    padding: 10px;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    min-height: 50px;
+  }
+  hr {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 25px 0;
+  }
+</style>
 </head>
 <body>
-    <h1>NPCs Registrados</h1>
 
-    <ul id="npc-list">
-        {% for npc in npcs %}
-        <li>
-            <strong>{{ npc.name }}</strong> - {{ npc.role }} - {{ npc.location }}<br />
-            <em>{{ npc.personality }}</em> | Status: {{ npc.status }}
-        </li>
-        {% else %}
-        <li>Nenhum NPC cadastrado ainda.</li>
-        {% endfor %}
-    </ul>
+<h1>NPCs Registrados</h1>
+<ul id="npc-list">
+  {% for npc in npcs %}
+  <li><strong>{{ npc.name }}</strong> - {{ npc.role }} - {{ npc.location }}<br>
+    <em>{{ npc.personality }}</em> | Status: {{ npc.status }}
+  </li>
+  {% else %}
+  <li>Nenhum NPC cadastrado ainda.</li>
+  {% endfor %}
+</ul>
 
-    <hr />
+<hr>
 
-    <h2>Cadastrar Novo NPC</h2>
-    <form id="npc-form">
-        <input type="text" name="name" placeholder="Nome" required />
-        <input type="text" name="role" placeholder="Função" required />
-        <input type="text" name="location" placeholder="Localização" required />
-        <input type="text" name="personality" placeholder="Personalidade" required />
-        <input type="text" name="status" placeholder="Status (ativo/inativo)" required />
-        <button type="submit">Cadastrar</button>
-    </form>
+<h2>Cadastrar Novo NPC</h2>
+<form id="npc-form">
+  <input name="name" placeholder="Nome" required />
+  <input name="role" placeholder="Função" required />
+  <input name="location" placeholder="Localização" required />
+  <input name="personality" placeholder="Personalidade" required />
+  <input name="status" placeholder="Status (ativo/inativo)" required />
+  <button type="submit">Cadastrar</button>
+</form>
 
-    <hr />
+<hr>
 
-    <div id="interaction-section">
-        <h2>Interagir com NPC</h2>
-        <form id="interact-form">
-            <select name="to" required>
-                <option value="" disabled selected>Selecione um NPC</option>
-                {% for npc in npcs %}
-                <option value="{{ npc.name }}">{{ npc.name }}</option>
-                {% endfor %}
-            </select>
-            <input type="text" name="message" placeholder="Sua mensagem" required />
-            <input type="text" name="from" placeholder="Seu nome (opcional)" />
-            <button type="submit">Enviar</button>
-        </form>
-        <div id="response"></div>
-    </div>
+<h2>Histórico da Narrativa</h2>
+<ul id="story-log"></ul>
 
-    <script>
-        document.getElementById("npc-form").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const data = {
-                name: form.name.value.trim(),
-                role: form.role.value.trim(),
-                location: form.location.value.trim(),
-                personality: form.personality.value.trim(),
-                status: form.status.value.trim()
-            };
+<hr>
 
-            try {
-                const response = await fetch("/register_npc", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(data)
-                });
+<h2>Interagir com NPC</h2>
+<form id="interact-form">
+  <select name="to" required>
+    <option value="" disabled selected>Selecione um NPC</option>
+    {% for npc in npcs %}
+    <option value="{{ npc.name }}">{{ npc.name }}</option>
+    {% endfor %}
+  </select>
+  <input name="message" placeholder="Sua mensagem" required />
+  <input name="from" placeholder="Seu nome (opcional)" />
+  <button type="submit">Enviar</button>
+</form>
 
-                if (response.ok) {
-                    alert("NPC cadastrado com sucesso!");
-                    window.location.reload();
-                } else {
-                    const err = await response.json();
-                    alert("Erro ao cadastrar NPC: " + (err.message || JSON.stringify(err)));
-                }
-            } catch (error) {
-                alert("Erro na comunicação com o servidor.");
-            }
-        });
+<div id="response"></div>
 
-        document.getElementById("interact-form").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const data = {
-                to: form.to.value,
-                message: form.message.value.trim(),
-                from: form.from.value.trim() || "Usuário"
-            };
+<script>
+  async function fetchJSON(url, options) {
+    const res = await fetch(url, options);
+    if (!res.ok) throw await res.json();
+    return res.json();
+  }
 
-            const responseDiv = document.getElementById("response");
-            responseDiv.textContent = "Carregando resposta...";
+  function addStoryEntry(entry) {
+    const ul = document.getElementById("story-log");
+    const li = document.createElement("li");
+    li.textContent = `${entry.created_at}: ${entry.entry}`;
+    ul.appendChild(li);
+  }
 
-            try {
-                const response = await fetch("/interact", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(data)
-                });
+  async function loadStoryLog() {
+    try {
+      const log = await fetchJSON("/story_log");
+      log.forEach(addStoryEntry);
+    } catch {
+      console.warn("Erro ao carregar histórico da narrativa.");
+    }
+  }
 
-                if (response.ok) {
-                    const json = await response.json();
-                    responseDiv.textContent = `Resposta de ${json.from} para ${json.to}:\n${json.response}`;
-                } else {
-                    const err = await response.json();
-                    responseDiv.textContent = "Erro: " + (err.error || JSON.stringify(err));
-                }
-            } catch (error) {
-                responseDiv.textContent = "Erro na comunicação com o servidor.";
-            }
-        });
-    </script>
+  document.getElementById("npc-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    const form = e.target;
+    const data = Object.fromEntries(new FormData(form));
+    try {
+      await fetchJSON("/register_npc", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+      });
+      alert("NPC cadastrado com sucesso!");
+      location.reload();
+    } catch (err) {
+      alert("Erro ao cadastrar NPC: " + (err.message || JSON.stringify(err)));
+    }
+  });
+
+  document.getElementById("interact-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    const form = e.target;
+    const data = {
+      to: form.to.value,
+      message: form.message.value.trim(),
+      from: form.from.value.trim() || "Usuário"
+    };
+    const responseDiv = document.getElementById("response");
+    responseDiv.textContent = "Carregando resposta...";
+    try {
+      const json = await fetchJSON("/interact_npc", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+      });
+      responseDiv.textContent = `Resposta de ${json.from} para ${json.to}:\n${json.response}`;
+    } catch (err) {
+      responseDiv.textContent = "Erro: " + (err.error || JSON.stringify(err));
+    }
+  });
+
+  loadStoryLog();
+</script>
+
 </body>
 </html>

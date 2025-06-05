@@ -1,21 +1,18 @@
 from flask import Flask, render_template
-from flask_cors import CORS
-from dotenv import load_dotenv
-from routes.npc_routes import npc_bp
+from models.npcverse_model import get_all_npcs
+from routes.npcverse_routes import npcverse_bp
 
-load_dotenv()
+def create_app():
+    app = Flask(__name__)
+    app.register_blueprint(npcverse_bp)
 
-app = Flask(__name__)
-CORS(app)
+    @app.route('/')
+    def index():
+        npcs = get_all_npcs()
+        return render_template('index.html', npcs=npcs)
 
-# Registra as rotas
-app.register_blueprint(npc_bp)
-
-@app.route('/')
-def index():
-    from services.db_service import get_all_npcs
-    npcs = get_all_npcs()
-    return render_template("index.html", npcs=npcs)
+    return app
 
 if __name__ == '__main__':
+    app = create_app()
     app.run(debug=True)
