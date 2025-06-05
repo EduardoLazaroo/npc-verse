@@ -4,6 +4,7 @@ from qdrant_client.http.models import (
     VectorParams, Distance, PayloadSchemaType
 )
 import os
+from uuid import uuid4
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -30,11 +31,15 @@ def init_qdrant():
 
 init_qdrant()
 
-def insert_npc_memory(npc_id, vector, text):
+def insert_npc_memory(npc_id, vector, text, memory_type="general"):
     point = PointStruct(
-        id=npc_id,
+        id=str(uuid4()),  # IDs únicos por memória
         vector=vector,
-        payload={"npc_id": npc_id, "type": "personality", "text": text}
+        payload={
+            "npc_id": npc_id,
+            "type": memory_type,
+            "text": text
+        }
     )
     qdrant.upsert(collection_name=collection_name, points=[point])
 

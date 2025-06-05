@@ -56,3 +56,21 @@ def get_story_log():
     cursor.close()
     conn.close()
     return results
+
+def update_npc_emotion(npc_id, emotion, mood=None):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    sql = "UPDATE npcs SET emotion = %s, mood = %s WHERE id = %s"
+    cursor.execute(sql, (emotion, mood, npc_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def get_npc_state(npc_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT emotion, mood FROM npcs WHERE id = %s", (npc_id,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result
