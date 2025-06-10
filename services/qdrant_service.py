@@ -1,14 +1,15 @@
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import (
-    PointStruct, Filter, FieldCondition, MatchValue,
-    VectorParams, Distance, PayloadSchemaType
+    PointStruct, VectorParams, Distance, PayloadSchemaType
 )
 import os
 from uuid import uuid4
 from dotenv import load_dotenv
+from services.embedding_service import embed_text
 
 load_dotenv()
 
+# Configurações de conexão com Qdrant
 qdrant = QdrantClient(
     url=os.getenv("QDRANT_URL"),
     api_key=os.getenv("QDRANT_API_KEY")
@@ -16,24 +17,29 @@ qdrant = QdrantClient(
 
 collection_name = "npc_memory"
 
-# Inicializa a coleção e o índice
 def init_qdrant():
+    # Verifica se a coleção existe, se não existir, cria
     if not qdrant.collection_exists(collection_name):
         qdrant.recreate_collection(
             collection_name=collection_name,
             vectors_config=VectorParams(size=384, distance=Distance.COSINE)
         )
-    qdrant.create_payload_index(
-        collection_name=collection_name,
-        field_name="npc_id",
-        field_schema=PayloadSchemaType.INTEGER
-    )
+        # Cria índice no campo npc_id para acelerar buscas
+        qdrant.create_payload_index(
+            collection_name=collection_name,
+            field_name="npc_id",
+            field_schema=PayloadSchemaType.INTEGER
+        )
 
+# Inicializa a coleção ao importar o módulo
 init_qdrant()
 
 def insert_npc_memory(npc_id, vector, text, memory_type="general"):
+    """
+    Insere uma memória vetorial na coleção npc_memory do Qdrant.
+    """
     point = PointStruct(
-        id=str(uuid4()),  # IDs únicos por memória
+        id=str(uuid4()),  # ID único
         vector=vector,
         payload={
             "npc_id": npc_id,
@@ -43,14 +49,24 @@ def insert_npc_memory(npc_id, vector, text, memory_type="general"):
     )
     qdrant.upsert(collection_name=collection_name, points=[point])
 
-def search_npc_memory(npc_id, query_vector):
+def search_npc_memories(npc_id, query_text, memory_types=None, top_k=3):
+    query_vector = embed_text(query_text)
+
+    must_conditions = [{"key": "npc_id", "match": {"value": npc_id}}]
+    if memory_types:
+        must_conditions.append({
+            "key": "type",
+            "match": {"value": memory_types}
+        })
+
     results = qdrant.search(
         collection_name=collection_name,
         query_vector=query_vector,
-        limit=1,
-        query_filter=Filter(must=[FieldCondition(key="npc_id", match=MatchValue(value=npc_id))])
+        limit=top_k,
+        query_filter={
+            "must": must_conditions
+        },
+        with_payload=True
     )
-    if results:
-        hit = results[0]
-        return {"text": hit.payload.get("text", ""), "score": hit.score}
-    return None
+
+    return [hit.payload["text"] for hit in results if "text" in hit.payload]

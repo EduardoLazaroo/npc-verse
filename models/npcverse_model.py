@@ -40,6 +40,17 @@ def save_interaction(sender, receiver, message, response):
     cursor.close()
     conn.close()
 
+def get_interactions_with_npc(npc_name):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(
+        "SELECT * FROM interactions WHERE receiver = %s ORDER BY id ASC", (npc_name,)
+    )
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
+
 def save_story_entry(entry):
     conn = get_db_connection()
     cursor = conn.cursor()
