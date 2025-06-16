@@ -85,7 +85,7 @@ Responda de forma coerente com sua personalidade, humor e todo o contexto da con
     story_entry = f"{sender} falou com {receiver}: \"{message}\"\n{receiver} respondeu: \"{response}\""
     save_story_entry(story_entry)
 
-    # 🧠 Salva as memórias
+    # 🧠 Salva as memórias vetoriais
     insert_npc_memory(npc['id'], embed_text(message), message, memory_type="mensagem_usuario")
     insert_npc_memory(npc['id'], embed_text(response), response, memory_type="resposta_npc")
 

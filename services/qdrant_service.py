@@ -54,9 +54,12 @@ def search_npc_memories(npc_id, query_text, memory_types=None, top_k=3):
 
     must_conditions = [{"key": "npc_id", "match": {"value": npc_id}}]
     if memory_types:
+        # Pode ser uma lista ou string, adapta para lista
+        if isinstance(memory_types, str):
+            memory_types = [memory_types]
         must_conditions.append({
             "key": "type",
-            "match": {"value": memory_types}
+            "match": {"any": memory_types}  # filtro para qualquer dos tipos indicados
         })
 
     results = qdrant.search(

@@ -1,76 +1,80 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8" />
-<title>NPCVerse</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    max-width: 700px;
-    margin: 30px auto;
-    padding: 0 15px;
-    background: #f5f5f5;
-    color: #333;
-  }
-  h1, h2 {
-    margin-bottom: 12px;
-  }
-  ul {
-    list-style: none;
-    padding-left: 0;
-  }
-  li {
-    background: #fff;
-    margin-bottom: 12px;
-    padding: 10px 14px;
-    border-radius: 5px;
-    box-shadow: 0 1px 3px #ccc;
-  }
-  form {
-    background: #fff;
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: 0 1px 3px #ccc;
-    margin-bottom: 25px;
-  }
-  input, select, button {
-    display: block;
-    width: 100%;
-    margin: 6px 0;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-  }
-  button {
-    background: #007BFF;
-    color: #fff;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-  button:hover {
-    background: #0056b3;
-  }
-  #response {
-    background: #e9ecef;
-    padding: 10px;
-    border-radius: 4px;
-    white-space: pre-wrap;
-    min-height: 50px;
-  }
-  hr {
-    border: none;
-    border-top: 1px solid #ccc;
-    margin: 25px 0;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <title>NPCVerse</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 30px auto;
+      padding: 0 15px;
+      background: #f5f5f5;
+      color: #333;
+    }
+    h1, h2 {
+      margin-bottom: 12px;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    li {
+      background: #fff;
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      border-radius: 5px;
+      box-shadow: 0 1px 3px #ccc;
+    }
+    form {
+      background: #fff;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 1px 3px #ccc;
+      margin-bottom: 25px;
+    }
+    input, select, button, textarea {
+      display: block;
+      width: 100%;
+      margin: 6px 0;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    textarea {
+      resize: vertical;
+    }
+    button {
+      background: #007BFF;
+      color: #fff;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #response {
+      background: #e9ecef;
+      padding: 10px;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      min-height: 50px;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #ccc;
+      margin: 25px 0;
+    }
+  </style>
 </head>
 <body>
 
 <h1>NPCs Registrados</h1>
 <ul id="npc-list">
+  <!-- Aqui pode ser preenchido pelo backend (ex: Flask + Jinja) -->
   {% for npc in npcs %}
   <li><strong>{{ npc.name }}</strong> - {{ npc.role }} - {{ npc.location }}<br>
     <em>{{ npc.personality }}</em> | Status: {{ npc.status }}
@@ -82,13 +86,30 @@
 
 <hr>
 
+<h2>Buscar NPC via IA</h2>
+<form id="search-form">
+  <input name="query" placeholder="Digite um termo (ex: guerreiro, ladina...)" required />
+  <button type="submit">Buscar</button>
+</form>
+
+<hr>
+
 <h2>Cadastrar Novo NPC</h2>
 <form id="npc-form">
   <input name="name" placeholder="Nome" required />
-  <input name="role" placeholder="Função" required />
-  <input name="location" placeholder="Localização" required />
-  <input name="personality" placeholder="Personalidade" required />
-  <input name="status" placeholder="Status (ativo/inativo)" required />
+  <input name="origin_world" placeholder="Mundo de Origem" />
+  <input name="archetype" placeholder="Arquétipo" />
+  <input name="alignment" placeholder="Alinhamento" />
+  <input name="personality_traits" placeholder="Traços de Personalidade" />
+  <input name="voice_style" placeholder="Estilo de Voz" />
+  <input name="mood" placeholder="Humor" />
+  <input name="emotion" placeholder="Emoção" />
+  <input name="skills" placeholder="Habilidades" />
+  <input name="known_for" placeholder="Conhecido por" />
+  <input name="catchphrase" placeholder="Frase de efeito" />
+  <textarea name="backstory" placeholder="História de fundo"></textarea>
+  <input name="tags" placeholder="Tags (separadas por vírgula)" />
+  <input name="avatar_url" placeholder="URL do Avatar" />
   <button type="submit">Cadastrar</button>
 </form>
 
@@ -141,6 +162,9 @@
     e.preventDefault();
     const form = e.target;
     const data = Object.fromEntries(new FormData(form));
+    if (data.tags) {
+      data.tags = data.tags.split(',').map(t => t.trim());
+    }
     try {
       await fetchJSON("/register_npc", {
         method: "POST",
@@ -173,6 +197,40 @@
       responseDiv.textContent = `Resposta de ${json.from} para ${json.to}:\n${json.response}`;
     } catch (err) {
       responseDiv.textContent = "Erro: " + (err.error || JSON.stringify(err));
+    }
+  });
+
+  // Busca IA - agora espera objeto único NPC
+  document.getElementById("search-form").addEventListener("submit", async e => {
+    e.preventDefault();
+    const form = e.target;
+    const query = form.query.value.trim();
+    if (!query) return;
+    try {
+      const npc = await fetchJSON("/search_npc", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ query })
+      });
+
+      if (!npc || Object.keys(npc).length === 0) {
+        alert("Nenhum NPC encontrado.");
+        return;
+      }
+
+      const npcForm = document.getElementById("npc-form");
+
+      for (const [key, value] of Object.entries(npc)) {
+        const input = npcForm.elements.namedItem(key);
+        if (input) {
+          input.value = Array.isArray(value) ? value.join(', ') : value;
+        }
+      }
+
+      alert("NPC gerado e carregado. Você pode editar antes de cadastrar.");
+
+    } catch (err) {
+      alert("Erro ao buscar NPC: " + (err.error || JSON.stringify(err)));
     }
   });
 

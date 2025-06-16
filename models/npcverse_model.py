@@ -3,10 +3,30 @@ from models.db import get_db_connection
 def save_npc(data):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute(
-        "INSERT INTO npcs (name, role, location, personality, status) VALUES (%s, %s, %s, %s, %s)",
-        (data['name'], data['role'], data['location'], data['personality'], data['status'])
-    )
+
+    sql = """
+    INSERT INTO npcs
+    (name, origin_world, archetype, alignment, personality_traits, voice_style,
+    mood, emotion, skills, known_for, catchphrase, backstory, tags, avatar_url)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    cursor.execute(sql, (
+        data.get('name'),
+        data.get('origin_world'),
+        data.get('archetype'),
+        data.get('alignment'),
+        data.get('personality_traits'),
+        data.get('voice_style'),
+        data.get('mood'),
+        data.get('emotion'),
+        data.get('skills'),
+        data.get('known_for'),
+        data.get('catchphrase'),
+        data.get('backstory'),
+        ",".join(data.get('tags', [])) if isinstance(data.get('tags'), list) else data.get('tags'),
+        data.get('avatar_url')
+    ))
+
     conn.commit()
     cursor.close()
     conn.close()
