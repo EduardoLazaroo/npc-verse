@@ -1,81 +1,72 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <title>NPCVerse</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='style.css') }}"
-    />
-    <script defer src="{{ url_for('static', filename='main.js') }}"></script>
-  </head>
-  <body>
-    <h1>NPCs Registrados</h1>
-    <ul id="npc-list">
-      <!-- Aqui pode ser preenchido pelo backend (ex: Flask + Jinja) -->
-      {% for npc in npcs %}
-      <li>
-        <strong>{{ npc.name }}</strong> - {{ npc.role }} - {{ npc.location }}<br />
-        <em>{{ npc.personality }}</em> | Status: {{ npc.status }}
-      </li>
-      {% else %}
-      <li>Nenhum NPC cadastrado ainda.</li>
-      {% endfor %}
-    </ul>
+<head>
+  <meta charset="UTF-8" />
+  <title>NPCVerse</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <script defer src="{{ url_for('static', filename='main.js') }}"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body>
+  <header class="header">
+    <h1 class="title">NPCVerse</h1>
+  </header>
 
-    <hr />
+  <main class="main">
+    <section class="chat-container">
+      <aside class="sidebar">
+        <h2 class="section-title">NPCs</h2>
+        <select id="npc-select" name="to" required class="npc-select">
+          <option value="" disabled selected>Selecione um NPC</option>
+          {% for npc in npcs %}
+            <option value="{{ npc.name }}">{{ npc.name }}</option>
+          {% endfor %}
+        </select>
+      </aside>
 
-    <h2>Buscar NPC via IA</h2>
-    <form id="search-form">
-      <input
-        name="query"
-        placeholder="Digite um termo (ex: guerreiro, ladina...)"
-        required
-      />
-      <button type="submit">Buscar</button>
-    </form>
+      <section class="chat-box">
+        <header class="chat-header">
+          <h2 id="chat-npc-name">Histórico da Narrativa</h2>
+        </header>
+        <ul id="story-log" class="chat-log"></ul>
+        <form id="interact-form" class="chat-input-form">
+          <input name="message" placeholder="Sua mensagem" required />
+          <input name="from" placeholder="Seu nome (opcional)" />
+          <button type="submit">Enviar</button>
+        </form>
+      </section>
+    </section>
 
-    <hr />
+    <div class="component">
+      <section class="form-section one">
+        <h2 class="section-title">Buscar NPC via IA</h2>
+        <form id="search-form" class="form">
+          <input name="query" placeholder="Digite um termo (ex: guerreiro, ladina...)" required />
+          <button type="submit">Buscar</button>
+        </form>
+      </section>
 
-    <h2>Cadastrar Novo NPC</h2>
-    <form id="npc-form">
-      <input name="name" placeholder="Nome" required />
-      <input name="origin_world" placeholder="Mundo de Origem" />
-      <input name="archetype" placeholder="Arquétipo" />
-      <input name="alignment" placeholder="Alinhamento" />
-      <input name="personality_traits" placeholder="Traços de Personalidade" />
-      <input name="voice_style" placeholder="Estilo de Voz" />
-      <input name="mood" placeholder="Humor" />
-      <input name="emotion" placeholder="Emoção" />
-      <input name="skills" placeholder="Habilidades" />
-      <input name="known_for" placeholder="Conhecido por" />
-      <input name="catchphrase" placeholder="Frase de efeito" />
-      <textarea name="backstory" placeholder="História de fundo"></textarea>
-      <input name="tags" placeholder="Tags (separadas por vírgula)" />
-      <input name="avatar_url" placeholder="URL do Avatar" />
-      <button type="submit">Cadastrar</button>
-    </form>
-
-    <hr />
-
-    <h2>Histórico da Narrativa</h2>
-    <ul id="story-log"></ul>
-
-    <hr />
-
-    <h2>Interagir com NPC</h2>
-    <form id="interact-form">
-      <select name="to" required>
-        <option value="" disabled selected>Selecione um NPC</option>
-        {% for npc in npcs %}
-        <option value="{{ npc.name }}">{{ npc.name }}</option>
-        {% endfor %}
-      </select>
-      <input name="message" placeholder="Sua mensagem" required />
-      <input name="from" placeholder="Seu nome (opcional)" />
-      <button type="submit">Enviar</button>
-    </form>
-
-    <div id="response"></div>
-  </body>
+      <section class="form-section two">
+        <h2 class="section-title">Cadastrar Novo NPC</h2>
+        <form id="npc-form" class="form">
+          <input name="name" placeholder="Nome do NPC" required />
+          <input name="origin_world" placeholder="Mundo de Origem" />
+          <input name="archetype" placeholder="Arquétipo" />
+          <input name="alignment" placeholder="Alinhamento" />
+          <textarea name="backstory" placeholder="História de fundo" rows="4"></textarea>
+          <input name="personality_traits" placeholder="Traços de Personalidade" />
+          <input name="voice_style" placeholder="Estilo de Voz" />
+          <input name="mood" placeholder="Humor" />
+          <input name="emotion" placeholder="Emoção" />
+          <input name="skills" placeholder="Habilidades" />
+          <input name="known_for" placeholder="Conhecido por..." />
+          <input name="catchphrase" placeholder="Frase de efeito" />
+          <input name="tags" placeholder="Tags (separadas por vírgula)" />
+          <input name="avatar_url" placeholder="URL do Avatar" />
+          <button type="submit">Cadastrar NPC</button>
+        </form>
+      </section>
+    </div>
+  </main>
+</body>
 </html>

@@ -49,13 +49,26 @@ def get_npc_by_name(name):
     conn.close()
     return result
 
-def save_interaction(sender, receiver, message, response):
+def save_interaction(sender, npc_name, message, response):
+    """Salva interação somente na tabela interactions"""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
         "INSERT INTO interactions (sender, receiver, message, response) VALUES (%s, %s, %s, %s)",
-        (sender, receiver, message, response)
+        (sender, npc_name, message, response)
     )
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def save_story_entry(entry, npc_name=None):
+    """Salva entrada no log de narrativa"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    if npc_name:
+        cursor.execute("INSERT INTO story_log (entry, npc_name) VALUES (%s, %s)", (entry, npc_name))
+    else:
+        cursor.execute("INSERT INTO story_log (entry) VALUES (%s)", (entry,))
     conn.commit()
     cursor.close()
     conn.close()
@@ -71,18 +84,15 @@ def get_interactions_with_npc(npc_name):
     conn.close()
     return result
 
-def save_story_entry(entry):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO story_log (entry) VALUES (%s)", (entry,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-def get_story_log():
+def get_story_log_by_npc(npc_name):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT id, entry, created_at FROM story_log ORDER BY created_at DESC")
+    cursor.execute("""
+        SELECT id, entry, created_at 
+        FROM story_log 
+        WHERE npc_name = %s 
+        ORDER BY created_at DESC
+    """, (npc_name,))
     results = cursor.fetchall()
     cursor.close()
     conn.close()

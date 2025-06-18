@@ -9,7 +9,6 @@ from services.embedding_service import embed_text
 
 load_dotenv()
 
-# Configurações de conexão com Qdrant
 qdrant = QdrantClient(
     url=os.getenv("QDRANT_URL"),
     api_key=os.getenv("QDRANT_API_KEY")
@@ -18,20 +17,17 @@ qdrant = QdrantClient(
 collection_name = "npc_memory"
 
 def init_qdrant():
-    # Verifica se a coleção existe, se não existir, cria
     if not qdrant.collection_exists(collection_name):
         qdrant.recreate_collection(
             collection_name=collection_name,
             vectors_config=VectorParams(size=384, distance=Distance.COSINE)
         )
-        # Cria índice no campo npc_id para acelerar buscas
         qdrant.create_payload_index(
             collection_name=collection_name,
             field_name="npc_id",
             field_schema=PayloadSchemaType.INTEGER
         )
 
-# Inicializa a coleção ao importar o módulo
 init_qdrant()
 
 def insert_npc_memory(npc_id, vector, text, memory_type="general"):
@@ -39,7 +35,7 @@ def insert_npc_memory(npc_id, vector, text, memory_type="general"):
     Insere uma memória vetorial na coleção npc_memory do Qdrant.
     """
     point = PointStruct(
-        id=str(uuid4()),  # ID único
+        id=str(uuid4()),
         vector=vector,
         payload={
             "npc_id": npc_id,
@@ -53,13 +49,13 @@ def search_npc_memories(npc_id, query_text, memory_types=None, top_k=3):
     query_vector = embed_text(query_text)
 
     must_conditions = [{"key": "npc_id", "match": {"value": npc_id}}]
+
     if memory_types:
-        # Pode ser uma lista ou string, adapta para lista
         if isinstance(memory_types, str):
             memory_types = [memory_types]
         must_conditions.append({
             "key": "type",
-            "match": {"any": memory_types}  # filtro para qualquer dos tipos indicados
+            "match": {"any": memory_types}
         })
 
     results = qdrant.search(
