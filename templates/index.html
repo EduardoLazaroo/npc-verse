@@ -22,6 +22,28 @@
             <option value="{{ npc.name }}">{{ npc.name }}</option>
           {% endfor %}
         </select>
+
+        <div class="npc-display" id="npc-display" style="display: none;">
+          <div class="npc-align">
+            <p id="npc-name-display"></p>
+            <img src="" alt="Avatar do NPC" class="npc-avatar" id="npc-avatar" />
+          </div>
+
+          <div id="npc-details" class="npc-details">
+            <label><strong>Mundo:</strong> <span id="npc-origin"></span></label><br>
+            <label><strong>Arquétipo:</strong> <span id="npc-archetype"></span></label><br>
+            <label><strong>Alinhamento:</strong> <span id="npc-alignment"></span></label><br>
+            <label><strong>Traços:</strong> <span id="npc-traits"></span></label><br>
+            <label><strong>Voz:</strong> <span id="npc-voice"></span></label><br>
+            <label><strong>Humor:</strong> <span id="npc-mood"></span></label><br>
+            <label><strong>Emoção:</strong> <span id="npc-emotion"></span></label><br>
+            <label><strong>Habilidades:</strong> <span id="npc-skills"></span></label><br>
+            <label><strong>Conhecido por:</strong> <span id="npc-known"></span></label><br>
+            <label><strong>Bordão:</strong> <span id="npc-catchphrase"></span></label><br>
+            <label><strong>História:</strong> <span id="npc-backstory"></span></label><br>
+            <label><strong>Tags:</strong> <span id="npc-tags"></span></label>
+          </div>
+        </div>
       </aside>
 
       <section class="chat-box">
@@ -30,9 +52,11 @@
         </header>
         <ul id="story-log" class="chat-log"></ul>
         <form id="interact-form" class="chat-input-form">
-          <input name="message" placeholder="Sua mensagem" required />
-          <input name="from" placeholder="Seu nome (opcional)" />
-          <button type="submit">Enviar</button>
+          <textarea name="message" id="message"  placeholder="Sua mensagem" required></textarea>
+          <div class="input-actions">
+            <input name="from" placeholder="Seu nome (opcional)" />
+            <button type="submit">Enviar</button>
+          </div>
         </form>
       </section>
     </section>

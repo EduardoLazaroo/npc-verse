@@ -129,8 +129,38 @@ async function loadStoryLog(npcName = null) {
   }
 }
 
-document.getElementById("npc-select").addEventListener("change", e => {
-  loadStoryLog(e.target.value);
-});
+document.getElementById('npc-select').addEventListener('change', async function () {
+    const npcName = this.value;
+
+    if (!npcName) return;
+
+    try {
+      const npc = await fetchJSON(`/npc/${encodeURIComponent(npcName)}`);
+
+      // Exibe a interface de NPC
+      document.getElementById("npc-display").style.display = "block";
+
+      document.getElementById("npc-name-display").textContent = npc.name;
+      document.getElementById("npc-avatar").src = npc.avatar_url;
+
+      document.getElementById("npc-origin").textContent = npc.origin_world || "";
+      document.getElementById("npc-archetype").textContent = npc.archetype || "";
+      document.getElementById("npc-alignment").textContent = npc.alignment || "";
+      document.getElementById("npc-traits").textContent = npc.personality_traits || "";
+      document.getElementById("npc-voice").textContent = npc.voice_style || "";
+      document.getElementById("npc-mood").textContent = npc.mood || "";
+      document.getElementById("npc-emotion").textContent = npc.emotion || "";
+      document.getElementById("npc-skills").textContent = npc.skills || "";
+      document.getElementById("npc-known").textContent = npc.known_for || "";
+      document.getElementById("npc-catchphrase").textContent = npc.catchphrase || "";
+      document.getElementById("npc-backstory").textContent = npc.backstory || "";
+      document.getElementById("npc-tags").textContent = Array.isArray(npc.tags) ? npc.tags.join(', ') : npc.tags || "";
+
+      loadStoryLog(npcName);
+    } catch (err) {
+      alert("Erro ao buscar dados do NPC: " + (err.error || JSON.stringify(err)));
+    }
+  });
+
 
 loadStoryLog();

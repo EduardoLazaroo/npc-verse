@@ -1,5 +1,4 @@
 from models.npcverse_model import (
-    save_story_entry,
     get_npc_by_name,
     save_interaction,
     update_npc_emotion,

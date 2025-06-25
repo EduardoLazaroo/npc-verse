@@ -91,7 +91,7 @@ def get_story_log_by_npc(npc_name):
         SELECT id, entry, created_at 
         FROM story_log 
         WHERE npc_name = %s 
-        ORDER BY created_at DESC
+        ORDER BY created_at ASC
     """, (npc_name,))
     results = cursor.fetchall()
     cursor.close()

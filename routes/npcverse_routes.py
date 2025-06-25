@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify
 from models.npcverse_model import (
     save_npc,
     get_npc_by_name,
-    save_interaction,
     save_story_entry,
     update_npc_emotion,
     get_story_log_by_npc
@@ -16,6 +15,14 @@ load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 npcverse_bp = Blueprint('npcverse', __name__)
+
+@npcverse_bp.route('/npc/<name>', methods=['GET'])
+def get_npc_by_name_route(name):
+    npc = get_npc_by_name(name)
+    if not npc:
+        return jsonify({"error": "NPC não encontrado."}), 404
+    return jsonify(npc)
+
 
 @npcverse_bp.route('/register_npc', methods=['POST'])
 def register_npc():
@@ -116,7 +123,6 @@ def search_npc():
 Você é um sistema de criação de NPCs para jogos e narrativas.
 Baseado no termo genérico abaixo, gere apenas 1 personagem relevante.
 Se ele existir você deve usa-lo, caso nâo, crie um novo personagem.
-avatar_url deve ser uma URL válida de uma imagem de avatar.
 Para esse personagem, responda em português e apenas em formato JSON com os seguintes campos:
 
 - name (string)
@@ -157,6 +163,9 @@ Por favor, retorne apenas o JSON, nada mais.
 
         if isinstance(data, list):
             data = data[0]
+
+        nome = data.get("name", "npc")
+        data["avatar_url"] = f"https://robohash.org/{nome}.png?set=set2"
 
     except Exception as e:
         return jsonify({"error": f"Erro ao gerar NPCs: {str(e)}"}), 500
