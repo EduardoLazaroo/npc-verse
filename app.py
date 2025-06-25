@@ -1,12 +1,14 @@
 from flask import Flask, render_template
 from models.npcverse_model import get_all_npcs
 from routes.npcverse_routes import npcverse_bp
-import services.qdrant_service
+from services.qdrant_service import init_qdrant
 
 
 def create_app():
     app = Flask(__name__)
     app.register_blueprint(npcverse_bp)
+
+    init_qdrant()
 
     @app.route('/')
     def index():

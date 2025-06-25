@@ -68,20 +68,23 @@ def process_interaction(data):
     current_mood = npc_state.get("mood", "estável")
 
     sql_history = get_interactions_with_npc(receiver)[-10:]
-    formatted_sql_history = [
-        f"{entry['sender']} disse: \"{entry['message']}\"\n{entry['receiver']} respondeu: \"{entry['response']}\""
-        for entry in sql_history
-    ]
+    formatted_sql_history = []
+    for entry in sql_history:
+        formatted_sql_history.append(f"[USUÁRIO] {entry['sender']} disse: \"{entry['message']}\"")
+        formatted_sql_history.append(f"[NPC] {entry['receiver']} respondeu: \"{entry['response']}\"")
 
     vector_memories = search_npc_memories(
         npc_id=npc['id'],
         query_text=message,
-        memory_types=["mensagem_usuario", "resposta_npc"],
-        top_k=3
+        memory_types=["interacao"],
+        top_k=5,
+        debug=True
     )
     formatted_vector_memories = [f"(memória relevante) {mem}" for mem in vector_memories]
 
     full_context = "\n".join(formatted_vector_memories + formatted_sql_history)
+
+    print("\n[DEBUG] Full context being used:\n" + full_context + "\n")
 
     personality = npc.get("personality", "")
 
@@ -89,12 +92,17 @@ def process_interaction(data):
 Você é {npc['name']}, um NPC com a seguinte personalidade: {personality}.
 Seu estado emocional atual é {current_emotion} e seu humor está {current_mood}.
 
-Contexto recuperado da memória:
+Contexto recuperado da memória (com marcações claras de quem falou o quê):
 {full_context}
 
-Agora {sender} diz: "{message}"
+Agora, o usuário chamado \"{sender}\" diz: \"{message}\"
 
-Responda apenas o texto da fala do NPC, sem repetir seu nome ou qualquer prefixo.
+INSTRUÇÃO IMPORTANTE:
+- Se a pergunta do usuário for para saber qual foi a pergunta que ele fez em alguma interação passada, responda **APENAS** com o texto da pergunta feita pelo usuário naquela interação, sem responder com a fala do NPC.
+- Se a pergunta do usuário for qualquer outra coisa, responda normalmente com o texto do NPC, sem prefixos ou nomes.
+- Nunca responda com o texto de uma fala do NPC quando o usuário pedir pela pergunta feita por ele.
+
+Responda apenas o texto da fala apropriada de acordo com essas regras.
 """
 
     try:
@@ -110,7 +118,8 @@ Responda apenas o texto da fala do NPC, sem repetir seu nome ou qualquer prefixo
     except Exception as e:
         response = f"[Erro na geração da resposta do NPC: {str(e)}]"
 
-    detected_emotion = detect_emotion_from_message(message)
+    user_emotion = detect_emotion_from_message(message)
+    npc_emotion = detect_emotion_from_message(response)
 
     emotion_map = {
         "grato": ("grato", "satisfeito"),
@@ -125,14 +134,42 @@ Responda apenas o texto da fala do NPC, sem repetir seu nome ou qualquer prefixo
         "neutro": ("neutro", "estável"),
     }
 
-    new_emotion, new_mood = emotion_map.get(detected_emotion, ("neutro", "estável"))
+    new_emotion, new_mood = emotion_map.get(npc_emotion, ("neutro", "estável"))
 
     update_npc_emotion(npc['id'], new_emotion, new_mood)
 
-    save_interaction(sender, receiver, message, response)
+    existing_interactions = get_interactions_with_npc(receiver)
+    interaction_index = len(existing_interactions) + 1
 
-    insert_npc_memory(npc['id'], embed_text(message), message, memory_type="mensagem_usuario")
-    insert_npc_memory(npc['id'], embed_text(response), response, memory_type="resposta_npc")
+    full_interaction_text = f'{sender}: "{message}"\n{npc["name"]}: "{response}"'
+    embedding_vector = embed_text(full_interaction_text)
+
+    embedding_id = insert_npc_memory(
+        npc_id=npc['id'],
+        vector=embedding_vector,
+        text=full_interaction_text,
+        memory_type="interacao",
+        metadata={
+            "sender": sender,
+            "receiver": npc['name'],
+            "interaction_index": interaction_index,
+            "user_emotion": user_emotion,
+            "npc_emotion": npc_emotion,
+        }
+    )
+    save_interaction(
+        sender=sender,
+        npc_name=npc['name'],
+        message=message,
+        response=response,
+        npc_id=npc['id'],
+        interaction_index=interaction_index,
+        sender_role="user",
+        user_emotion=user_emotion,
+        npc_emotion=npc_emotion,
+        embedding_id=embedding_id
+    )
+
 
     html = format_interaction_html(sender, npc['name'], message, response)
 

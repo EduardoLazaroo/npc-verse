@@ -21,10 +21,16 @@ CREATE TABLE npcs (
 
 CREATE TABLE interactions (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    sender VARCHAR(255),  -- ex: "Usuário"
-    receiver VARCHAR(255),  -- nome do NPC
-    message TEXT,  -- mensagem enviada
-    response TEXT, -- resposta do NPC
+    npc_id INT,
+    interaction_index INT,
+    sender_role VARCHAR(20),
+    user_emotion VARCHAR(50),
+    npc_emotion VARCHAR(50),
+    embedding_id VARCHAR(64),
+    sender VARCHAR(255),
+    receiver VARCHAR(255),
+    message TEXT,
+    response TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

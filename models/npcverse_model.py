@@ -49,13 +49,20 @@ def get_npc_by_name(name):
     conn.close()
     return result
 
-def save_interaction(sender, npc_name, message, response):
-    """Salva interação somente na tabela interactions"""
+def save_interaction(sender, npc_name, message, response, npc_id=None, interaction_index=None,
+                      sender_role="user", user_emotion="neutro", npc_emotion="neutro", embedding_id=None):
+    """Salva interação na tabela interactions com campos expandidos"""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO interactions (sender, receiver, message, response) VALUES (%s, %s, %s, %s)",
-        (sender, npc_name, message, response)
+        """
+        INSERT INTO interactions (
+            npc_id, interaction_index, sender_role, user_emotion, npc_emotion,
+            embedding_id, sender, receiver, message, response
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """,
+        (npc_id, interaction_index, sender_role, user_emotion, npc_emotion,
+         embedding_id, sender, npc_name, message, response)
     )
     conn.commit()
     cursor.close()
