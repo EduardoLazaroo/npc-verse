@@ -1,45 +1,67 @@
-🧠 NPCVerse — Sistema de NPCs Interativos com Memória Híbrida
-O NPCVerse é um sistema backend que permite a criação de NPCs interativos com personalidade, emoções variáveis e capacidade de lembrar interações anteriores. Ele combina recuperação simbólica (SQL) com memória semântica vetorial (Qdrant) para construir um modelo conversacional mais realista e imersivo.
+# 🧠 NPCVerse – NPCs Interativos com Memória, Emoção e Personalidade
 
-⚙️ Tecnologias Utilizadas
-Flask (Python): Backend RESTful modularizado por routes, models e services.
+O **NPCVerse** é uma aplicação web que permite criar, interagir e evoluir **NPCs inteligentes** com **memória híbrida**, **personalidade persistente** e **emoções dinâmicas**, utilizando o poder da **IA generativa**, **embeddings vetoriais** e **modelos da OpenAI**.
 
-MySQL: Armazena dados estruturados (NPCs, emoções, histórico, interações).
+![NPCVerse Banner](https://i.postimg.cc/YSmj2fL0/npcverse-banner.png)
 
-Qdrant: Banco vetorial para memórias semânticas com filtro por tipo, NPC e recência.
+---
 
-OpenAI GPT-4o-mini: Geração de respostas personalizadas com base no estado emocional e contexto.
+## ✨ Funcionalidades
 
-Sentence Transformers (all-MiniLM-L6-v2): Conversão de texto em embeddings vetoriais.
+- 🧬 **Criação de NPCs** via prompts inteligentes com **GPT-4**
+- 💾 **Armazenamento híbrido**: banco relacional (**SQLite**) + memória semântica vetorial (**Qdrant**)
+- 🧠 **Emoções dinâmicas** com detecção e decaimento automático
+- 🗣️ **Interação contextualizada** com:
+  - Últimas **10 interações** salvas no banco SQL
+  - **3 memórias vetoriais relevantes** recuperadas por similaridade
+  - **Perfil e estado emocional** atual do NPC
+- 🎭 **Personalidade persistente** baseada em traços e histórico individual
+- 🌐 Interface web com cadastro, histórico de conversa e avatar
 
-dotenv: Gerenciamento seguro de variáveis sensíveis.
+---
 
-🧩 Funcionalidades Chave
-Memória híbrida de contexto:
+## 🛠️ Tecnologias Utilizadas
 
-Últimas 10 interações (SQL) → memória de curto prazo.
+| Camada           | Tecnologias                                                                 |
+|------------------|------------------------------------------------------------------------------|
+| Backend          | [Python](https://www.python.org/), [Flask](https://flask.palletsprojects.com/) |
+| Banco de Dados   | [SQLite](https://www.sqlite.org/)                                            |
+| Vetores Semânticos| [Qdrant](https://qdrant.tech/) (armazenamento e busca por similaridade)     |
+| Embeddings       | [SentenceTransformers - all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) |
+| IA Generativa    | [OpenAI GPT-4o](https://openai.com/gpt-4)                                    |
+| Frontend         | HTML, CSS custom, JavaScript Vanilla                                         |
+| Configuração     | [python-dotenv](https://pypi.org/project/python-dotenv/)                     |
+| Hospedagem       | Localhost (modo desenvolvimento)                                             |
 
-3 memórias semânticas mais relevantes (Qdrant) → memória de longo prazo.
+---
 
-Personalidade e estado emocional dinâmico:
+## 🧪 Como Rodar Localmente
 
-Cada NPC tem traços de personalidade definidos.
+### ✅ Pré-requisitos
 
-Emoções e humor mudam com base nas interações.
+- Python 3.10+
+- Conta com acesso à API da OpenAI
+- Instância local ou hospedada do Qdrant (você pode usar Docker)
+- Chaves de API configuradas
 
-Interação narrativa:
+### 🔧 Instalação
 
-Cada diálogo é registrado em um story_log com linguagem natural.
+```bash
+git clone https://github.com/seunome/npcverse.git
+cd npcverse
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+⚙️ Configuração
+Crie um arquivo .env com o seguinte conteúdo:
 
-Prompt dinâmico inteligente:
+env
 
-A construção do prompt do LLM combina: personalidade, humor, memória híbrida e nova mensagem.
+OPENAI_API_KEY=your_openai_key
+QDRANT_URL=http://localhost:6333
+QDRANT_API_KEY=your_qdrant_api_key  # se necessário
+🚀 Executar
+bash
 
-🧠 Arquitetura Cognitiva Simulada
-O projeto simula aspectos de cognição artificial:
-
-Integra memória episódica e semântica.
-
-Gera comportamento linguístico afetado por emoção.
-
-Permite diálogos consistentes e adaptativos ao longo do tempo.
+python app.py
+Abra no navegador: http://localhost:5000
