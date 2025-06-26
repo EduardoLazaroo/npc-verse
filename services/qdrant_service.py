@@ -49,10 +49,11 @@ def insert_npc_memory(npc_id, vector, text, memory_type="general", metadata=None
         vector=vector,
         payload=payload
     )
+
     qdrant.upsert(collection_name=collection_name, points=[point])
     return point.id
 
-def search_npc_memories(npc_id, query_text, memory_types=None, top_k=10, debug=False):
+def search_npc_memories(npc_id, query_text, memory_types=None, top_k=10, debug=False, min_score=0.3):
     query_vector = embed_text(query_text)
 
     must_conditions = [{"key": "npc_id", "match": {"value": npc_id}}]
@@ -76,13 +77,17 @@ def search_npc_memories(npc_id, query_text, memory_types=None, top_k=10, debug=F
         with_vectors=False
     )
 
+    # Filtra resultados que tenham score >= min_score
+    filtered = [hit for hit in results if hit.score >= min_score]
+
     if debug:
-        print(f"\n[QDRANT DEBUG] Top {top_k} resultados para o texto: \"{query_text}\"")
-        for idx, hit in enumerate(results, 1):
+        print(f"\n[QDRANT DEBUG] {len(filtered)} memórias relevantes para: \"{query_text}\" (score >= {min_score})")
+        for idx, hit in enumerate(filtered, 1):
             print(f"{idx}. Score: {hit.score:.4f}")
             print(f"   ID: {hit.id}")
             print(f"   Text: {hit.payload.get('text', 'sem texto')}")
             print(f"   Type: {hit.payload.get('type', 'sem tipo')}")
             print()
 
-    return [hit.payload["text"] for hit in results if "text" in hit.payload]
+    return [{"text": hit.payload.get("text", ""), "score": hit.score} for hit in filtered]
+

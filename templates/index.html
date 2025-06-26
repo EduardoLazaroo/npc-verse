@@ -1,96 +1,223 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-  <meta charset="UTF-8" />
-  <title>NPCVerse</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
-  <script defer src="{{ url_for('static', filename='main.js') }}"></script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-</head>
-<body>
-  <header class="header">
-    <h1 class="title">NPCVerse</h1>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <title>NPCVerse</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <script defer src="{{ url_for('static', filename='main.js') }}"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <header class="header">
+      <h1 class="title">NPCVerse</h1>
+    </header>
 
-  <main class="main">
-    <section class="chat-container">
-      <aside class="sidebar">
-        <h2 class="section-title">NPCs</h2>
-        <select id="npc-select" name="to" required class="npc-select">
-          <option value="" disabled selected>Selecione um NPC</option>
-          {% for npc in npcs %}
+    <main class="main">
+      <section class="chat-container">
+        <aside class="sidebar">
+          <h2 class="section-title">NPCs</h2>
+          <select id="npc-select" name="to" required class="npc-select">
+            <option value="" disabled selected>Selecione um NPC</option>
+            {% for npc in npcs %}
             <option value="{{ npc.name }}">{{ npc.name }}</option>
-          {% endfor %}
-        </select>
+            {% endfor %}
+          </select>
 
-        <div class="npc-display" id="npc-display" style="display: none;">
-          <div class="npc-align">
-            <p id="npc-name-display"></p>
-            <img src="" alt="Avatar do NPC" class="npc-avatar" id="npc-avatar" />
-          </div>
+          <div class="npc-display" id="npc-display" style="display: none">
+            <div class="npc-align">
+              <p id="npc-name-display"></p>
+              <img
+                src=""
+                alt="Avatar do NPC"
+                class="npc-avatar"
+                id="npc-avatar"
+              />
+            </div>
 
-          <div id="npc-details" class="npc-details">
-            <label><strong>Mundo:</strong> <span id="npc-origin"></span></label><br>
-            <label><strong>Arquétipo:</strong> <span id="npc-archetype"></span></label><br>
-            <label><strong>Alinhamento:</strong> <span id="npc-alignment"></span></label><br>
-            <label><strong>Traços:</strong> <span id="npc-traits"></span></label><br>
-            <label><strong>Voz:</strong> <span id="npc-voice"></span></label><br>
-            <label><strong>Humor:</strong> <span id="npc-mood"></span></label><br>
-            <label><strong>Emoção:</strong> <span id="npc-emotion"></span></label><br>
-            <label><strong>Habilidades:</strong> <span id="npc-skills"></span></label><br>
-            <label><strong>Conhecido por:</strong> <span id="npc-known"></span></label><br>
-            <label><strong>Bordão:</strong> <span id="npc-catchphrase"></span></label><br>
-            <label><strong>História:</strong> <span id="npc-backstory"></span></label><br>
-            <label><strong>Tags:</strong> <span id="npc-tags"></span></label>
-          </div>
-        </div>
-      </aside>
+<div id="npc-details" class="npc-details">
+  <div class="npc-field"><strong>Mundo:</strong> <span id="npc-origin"></span></div>
+  <div class="npc-field"><strong>Arquétipo:</strong> <span id="npc-archetype"></span></div>
+  <div class="npc-field"><strong>Alinhamento:</strong> <span id="npc-alignment"></span></div>
+  <div class="npc-field"><strong>Traços:</strong> <span id="npc-traits"></span></div>
+  <div class="npc-field"><strong>Voz:</strong> <span id="npc-voice"></span></div>
+  <div class="npc-field"><strong>Humor:</strong> <span id="npc-mood"></span></div>
+  <div class="npc-field"><strong>Emoção:</strong> <span id="npc-emotion"></span></div>
+  <div class="npc-field"><strong>Habilidades:</strong> <span id="npc-skills"></span></div>
+  <div class="npc-field"><strong>Conhecido por:</strong> <span id="npc-known"></span></div>
+  <div class="npc-field"><strong>Bordão:</strong> <span id="npc-catchphrase"></span></div>
+  <div class="npc-field"><strong>História:</strong> <span id="npc-backstory"></span></div>
+  <div class="npc-field"><strong>Tags:</strong> <span id="npc-tags"></span></div>
+</div>
 
-      <section class="chat-box">
-        <header class="chat-header">
-          <h2 id="chat-npc-name">Histórico da Narrativa</h2>
-        </header>
-        <ul id="story-log" class="chat-log"></ul>
-        <form id="interact-form" class="chat-input-form">
-          <textarea name="message" id="message"  placeholder="Sua mensagem" required></textarea>
-          <div class="input-actions">
-            <input name="from" placeholder="Seu nome (opcional)" />
-            <button type="submit">Enviar</button>
           </div>
-        </form>
+        </aside>
+
+        <section class="chat-box">
+          <header class="chat-header">
+            <h2 id="chat-npc-name">Histórico da Narrativa</h2>
+          </header>
+          <ul id="story-log" class="chat-log"></ul>
+          <form id="interact-form" class="chat-input-form">
+            <textarea
+              name="message"
+              id="message"
+              placeholder="Sua mensagem"
+              required
+            ></textarea>
+            <div class="input-actions">
+              <input name="from" placeholder="Seu nome (opcional)" />
+              <button type="submit">Enviar</button>
+            </div>
+          </form>
+        </section>
       </section>
-    </section>
-
-    <div class="component">
-      <section class="form-section one">
-        <h2 class="section-title">Buscar NPC via IA</h2>
-        <form id="search-form" class="form">
-          <input name="query" placeholder="Digite um termo (ex: guerreiro, ladina...)" required />
+      <div class="npc-panel">
+        <form id="search-form" class="search-bar">
+          <input
+            class="form-input"
+            name="query"
+            placeholder="Digite um termo (ex: guerreiro, ladina...)"
+            required
+          />
           <button type="submit">Buscar</button>
         </form>
-      </section>
 
-      <section class="form-section two">
-        <h2 class="section-title">Cadastrar Novo NPC</h2>
-        <form id="npc-form" class="form">
-          <input name="name" placeholder="Nome do NPC" required />
-          <input name="origin_world" placeholder="Mundo de Origem" />
-          <input name="archetype" placeholder="Arquétipo" />
-          <input name="alignment" placeholder="Alinhamento" />
-          <textarea name="backstory" placeholder="História de fundo" rows="4"></textarea>
-          <input name="personality_traits" placeholder="Traços de Personalidade" />
-          <input name="voice_style" placeholder="Estilo de Voz" />
-          <input name="mood" placeholder="Humor" />
-          <input name="emotion" placeholder="Emoção" />
-          <input name="skills" placeholder="Habilidades" />
-          <input name="known_for" placeholder="Conhecido por..." />
-          <input name="catchphrase" placeholder="Frase de efeito" />
-          <input name="tags" placeholder="Tags (separadas por vírgula)" />
-          <input name="avatar_url" placeholder="URL do Avatar" />
-          <button type="submit">Cadastrar NPC</button>
-        </form>
-      </section>
-    </div>
-  </main>
-</body>
+        <section class="form-section">
+          <h2 class="section-title">Cadastrar Novo NPC</h2>
+          <form id="npc-form" class="form form-grid">
+            <div class="grid-pair">
+              <div>
+                <label for="name">Nome</label>
+                <input
+                  id="name"
+                  name="name"
+                  placeholder="Ex: Arthus"
+                  required
+                />
+              </div>
+              <div>
+                <label for="origin_world">Mundo de Origem</label>
+                <input
+                  id="origin_world"
+                  name="origin_world"
+                  placeholder="Ex: Eldoria"
+                />
+              </div>
+            </div>
+
+            <div class="grid-pair">
+              <div>
+                <label for="archetype">Arquétipo</label>
+                <input
+                  id="archetype"
+                  name="archetype"
+                  placeholder="Ex: Guerreiro"
+                />
+              </div>
+              <div>
+                <label for="alignment">Alinhamento</label>
+                <input
+                  id="alignment"
+                  name="alignment"
+                  placeholder="Ex: Leal Bom"
+                />
+              </div>
+            </div>
+
+            <div class="grid-pair">
+              <div>
+                <label for="personality_traits">Traços de Personalidade</label>
+                <input
+                  id="personality_traits"
+                  name="personality_traits"
+                  placeholder="Ex: Corajoso, Leal"
+                />
+              </div>
+              <div>
+                <label for="emotion">Emoção</label>
+                <input id="emotion" name="emotion" placeholder="Ex: Feliz" />
+              </div>
+            </div>
+
+            <div class="grid-pair">
+              <div>
+                <label for="mood">Humor</label>
+                <input id="mood" name="mood" placeholder="Ex: Animado" />
+              </div>
+              <div>
+                <label for="voice_style">Estilo de Voz</label>
+                <input
+                  id="voice_style"
+                  name="voice_style"
+                  placeholder="Ex: Calmo"
+                />
+              </div>
+            </div>
+
+            <div class="grid-pair">
+              <div>
+                <label for="skills">Habilidades</label>
+                <input
+                  id="skills"
+                  name="skills"
+                  placeholder="Ex: Espada, Magia"
+                />
+              </div>
+              <div>
+                <label for="known_for">Conhecido por</label>
+                <input
+                  id="known_for"
+                  name="known_for"
+                  placeholder="Ex: Derrotar dragões"
+                />
+              </div>
+            </div>
+
+            <div class="grid-pair">
+              <div>
+                <label for="tags">Tags</label>
+                <input
+                  id="tags"
+                  name="tags"
+                  placeholder="Ex: sábio, guerreiro"
+                />
+              </div>
+              <div>
+                <label for="avatar_url">URL do Avatar</label>
+                <input
+                  id="avatar_url"
+                  name="avatar_url"
+                  placeholder="Ex: https://..."
+                />
+              </div>
+            </div>
+
+            <div>
+              <label for="backstory">História de Fundo</label>
+              <textarea
+                id="backstory"
+                name="backstory"
+                placeholder="Descreva a origem do NPC"
+                rows="4"
+              ></textarea>
+            </div>
+
+            <div>
+              <label for="catchphrase">Frase de Efeito</label>
+              <input
+                id="catchphrase"
+                name="catchphrase"
+                placeholder="Ex: Pela luz!"
+              />
+            </div>
+
+            <button type="submit">Cadastrar NPC</button>
+          </form>
+        </section>
+      </div>
+    </main>
+  </body>
 </html>

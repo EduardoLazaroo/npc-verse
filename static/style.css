@@ -32,7 +32,7 @@ body {
 /* HEADER */
 header.header {
   text-align: center;
-  padding: 30px 0;
+  padding: 10px 0;
 }
 
 .title {
@@ -44,8 +44,8 @@ header.header {
 /* LAYOUT PRINCIPAL */
 .main {
   display: flex;
-  flex-direction: column;
-  gap: 40px;
+  flex-direction: row-reverse;
+  gap: 20px;
 }
 
 .component {
@@ -72,7 +72,7 @@ header.header {
   box-shadow: 0 0 12px #00000050;
   border: 1px solid var(--border);
   width: 100%;
-  max-width: 600px;
+  max-width: 1000px;
 }
 
 .form input,
@@ -96,6 +96,13 @@ header.header {
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
   outline: none;
 }
+.form label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
 
 /* BOTÃO */
 .form button {
@@ -120,7 +127,7 @@ header.header {
   display: flex;
   flex-direction: row;
   width: 100%;
-  max-width: 1600px;
+  /* max-width: 1450px; */
   min-width: 320px;
   height: 85vh;
   margin: 0 auto;
@@ -170,20 +177,36 @@ header.header {
   border: 2px solid var(--highlight);
 }
 
-.npc-details label {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
+.npc-details {
+  padding: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 0 10px #00000040;
+  color: var(--text-primary);
+  font-size: 0.95rem;
 }
 
-.npc-details {
-  max-height: 50vh;
-  overflow-y: auto;
-  padding-right: 10px;
+.npc-field {
+  margin-bottom: 8px;
+  padding: 8px;
+  background-color: var(--input-bg);
+  border-radius: 8px;
+  display: flex;
+  gap: 6px;
+  line-height: 1.4;
 }
+
+.npc-field strong {
+  color: var(--highlight);
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
 
 /* CHATBOX */
 .chat-box {
-  flex: 2.5;
+  flex: 2.2;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -318,6 +341,7 @@ header.header {
   margin-left: 8px;
 }
 
+/* RESPONSIVO */
 @media (max-width: 1024px) {
   .chat-container {
     flex-direction: column;
@@ -334,5 +358,97 @@ header.header {
 
   .chat-box {
     min-width: 100%;
+  }
+}
+
+/* PAINEL E FORMULÁRIO DE CADASTRO */
+.npc-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 650px;
+  margin: 0 auto;
+  padding: 0 10px;
+}
+
+.search-bar {
+  display: flex;
+  gap: 10px;
+  background: var(--bg-card);
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 0 12px #00000050;
+  border: 1px solid var(--border);
+}
+
+.search-bar input {
+  flex: 1;
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
+  padding: 12px;
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.search-bar button {
+  padding: 12px 20px;
+  border-radius: 8px;
+  background-color: var(--highlight);
+  border: none;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.search-bar button:hover {
+  background-color: var(--highlight-hover);
+}
+
+.form-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.grid-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-grid textarea,
+.form-grid input,
+.form-grid button {
+  width: 100%;
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
+  padding: 12px;
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.form-grid input:focus,
+.form-grid textarea:focus {
+  border-color: var(--highlight);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+  outline: none;
+}
+
+.form-grid button {
+  background-color: var(--highlight);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.form-grid button:hover {
+  background-color: var(--highlight-hover);
+}
+/* Mobile: inputs em uma coluna só */
+@media (max-width: 768px) {
+  .grid-pair {
+    grid-template-columns: 1fr;
   }
 }
