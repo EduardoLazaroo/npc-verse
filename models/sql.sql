@@ -38,5 +38,6 @@ CREATE TABLE interactions (
 CREATE TABLE story_log (
     id INT AUTO_INCREMENT PRIMARY KEY,
     entry TEXT NOT NULL, -- entrada narrativa
+    npc_name VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

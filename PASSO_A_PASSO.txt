@@ -1,0 +1,133 @@
+# 🎯 PASSO A PASSO FINAL - NPCVerse
+
+**Status Atual:**
+- ✅ Python + venv + pacotes instalados
+- ✅ Qdrant online (cloud)
+- ✅ .env criado
+- ❌ **DB_PASS vazio** (MySQL não conecta)
+- ❓ MySQL com schema criado?
+
+---
+
+## PASSO 1️⃣: Preencher Senha MySQL no .env
+
+Abra `.env` e procure por:
+```
+DB_PASS=
+```
+
+Mude para sua senha MySQL real:
+```
+DB_PASS=sua_senha_aqui
+```
+
+**Salve o arquivo!**
+
+---
+
+## PASSO 2️⃣: Criar Schema MySQL (SE AINDA NÃO TIVER)
+
+Abra terminal/cmd e execute:
+
+```bash
+mysql -u root -p < models/sql.sql
+```
+
+Será pedida a senha MySQL. Digite.
+
+**Validar que funcionou:**
+```bash
+mysql -u root -p npcverse -e "SHOW TABLES;"
+```
+
+Deve retornar:
+```
++----------------------+
+| Tables_in_npcverse   |
++----------------------+
+| interactions         |
+| npcs                 |
+| story_log            |
++----------------------+
+```
+
+Se mostra isso: ✅ BD pronto!
+
+---
+
+## PASSO 3️⃣: Rodar a Aplicação
+
+No terminal, na raiz do projeto:
+
+```bash
+venv\Scripts\python app.py
+```
+
+Você deve ver:
+```
+ * Serving Flask app 'app'
+ * Debug mode: on
+ * Running on http://127.0.0.1:5000
+```
+
+---
+
+## PASSO 4️⃣: Acessar a App
+
+Abra navegador:
+```
+http://localhost:5000
+```
+
+**Pronto! 🎉**
+
+---
+
+## Resumo Técnico (Pro Referência)
+
+**Fluxo da App:**
+
+```
+Frontend (localhost:5000)
+    ↓
+Flask app.py
+    ├─ init_qdrant() → Conecta ao Qdrant Cloud (primeira vez baixa modelo)
+    ├─ GET /npcs → Busca do MySQL
+    ├─ POST /register_npc → Salva NPC no MySQL
+    ├─ POST /interact_npc → Processa interação:
+    │   ├─ Busca memórias no Qdrant
+    │   ├─ Busca histórico no MySQL
+    │   ├─ Chama OpenAI GPT-4o-mini
+    │   └─ Salva interação no MySQL
+    └─ GET /story_log → Retorna histórico
+
+MySQL npcverse:
+  - npcs: lista de personagens
+  - interactions: histórico de conversas
+  - story_log: narrativa geral
+
+Qdrant Cloud:
+  - Coleção "npc_memory" (embeddings 384-dim)
+  - Busca por similaridade de contexto
+```
+
+---
+
+## Se Algo Quebrar
+
+### ❌ "Access denied for user 'root'"
+→ Verifique `DB_PASS` no `.env`. Está preenchido?
+
+### ❌ "Table 'npcverse.npcs' doesn't exist"
+→ Execute: `mysql -u root -p < models/sql.sql`
+
+### ❌ "Connection timeout on Qdrant"
+→ Primeira vez demora (download do modelo). Tente novamente alguns segundos depois.
+
+### ❌ "Port 5000 in use"
+→ Execute: `netstat -ano | findstr :5000`
+Depois: `taskkill /PID <PID> /F`
+
+---
+
+**Tá! Comece pelo PASSO 1 e me avisa se der erro em algum!**
