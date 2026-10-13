@@ -1,0 +1,53 @@
+================================================================================
+  EXECUÇÃO E VALIDAÇÃO INTEGRADA: NPC-VERSE
+  Arquitetura Híbrida: Flask + MySQL 8 (Porta 3307) + Qdrant (Porta 6333) + MiniLM-L6-v2
+================================================================================
+
+[ETAPA 1] Conectando ao MySQL (porta 3307) e provisionando schema 'npcverse'...
+  Schema e tabelas 'npcs', 'interactions', 'story_log' criados com sucesso no MySQL!
+  3 NPCs de teste inseridos com sucesso na base relacional MySQL.
+
+[ETAPA 2] Carregando modelo SentenceTransformer 'all-MiniLM-L6-v2' (384 Dimensões)...
+  Modelo carregado com sucesso! Espaço vetorial: 384 dimensões.
+
+[ETAPA 3] Conectando ao Qdrant e inicializando coleção 'npc_memory'...
+  Coleção 'npc_memory' recriada com sucesso no Qdrant!
+
+[ETAPA 4] Vetorizando e indexando 6 memórias episódicas no Qdrant...
+  6 pontos indexados no HNSW Vector Index do Qdrant!
+
+[ETAPA 5] Teste de Recuperação Semântica (Nearest Neighbor Memory Retrieval):
+
+  Consulta Semântica 1: "Onde posso conseguir um remédio ou poção de cura para recuperar vida?"
+    Top-1 [Similaridade Cosseno: 0.5581] NPC: Gorim, o Ferreiro (forja) | "Quanto custa forjar uma espada de aço valiriano e um escudo reforçado?"
+    Top-2 [Similaridade Cosseno: 0.5062] NPC: Gorim, o Ferreiro (forja) | "Traga-me cinquenta barras de minério purificado e cem moedas de ouro para que eu acenda a forja."
+
+  Consulta Semântica 2: "Quais materiais são necessários para fazer uma nova arma ou espada resistente?"
+    Top-1 [Similaridade Cosseno: 0.5578] NPC: Lyra, a Ladina (exploração) | "Tenha cuidado extremo nas masmorras do norte: ouvi rumores de que um dragão vermelho despertou e as armadilhas são letais."
+    Top-2 [Similaridade Cosseno: 0.5505] NPC: Gorim, o Ferreiro (forja) | "Quanto custa forjar uma espada de aço valiriano e um escudo reforçado?"
+
+  Consulta Semântica 3: "Quais perigos e monstros foram avistados nas cavernas e masmorras?"
+    Top-1 [Similaridade Cosseno: 0.4232] NPC: Eldrin, o Mago (lore) | "Os feitiços proibidos da necromancia jamais devem ser invocados, sob pena de corrupção da alma."
+    Top-2 [Similaridade Cosseno: 0.3781] NPC: Lyra, a Ladina (exploração) | "Tenha cuidado extremo nas masmorras do norte: ouvi rumores de que um dragão vermelho despertou e as armadilhas são letais."
+
+[ETAPA 6] Inicializando aplicação Flask e executando testes de rotas...
+  Total de rotas registradas no Flask: 8
+    • Rota: /
+    • Rota: /interact_npc
+    • Rota: /npc/<name>
+    • Rota: /npcs
+    • Rota: /register_npc
+    • Rota: /search_npc
+    • Rota: /static/<path:filename>
+    • Rota: /story_log
+
+[ETAPA 7] Executando chamadas HTTP reais via TestClient:
+  GET / -> Status HTTP: 200 | Bytes: 7573
+  GET /npcs -> Status HTTP: 200
+    NPCs retornados do banco MySQL: 3
+      - ID 1: Eldrin, o Mago [Mago Arcano] - Humor: Reflexivo / Emoção: Calmo
+      - ID 2: Gorim, o Ferreiro [Ferreiro Mestre] - Humor: Focado / Emoção: Determinado
+      - ID 3: Lyra, a Ladina [Espiã e Ladina] - Humor: Alerta / Emoção: Cautelosa
+  GET /npc/Eldrin,%20o%20Mago -> Status HTTP: 200
+    Bordão: "O conhecimento aguarda aqueles que sabem ouvir." | Habilidades: Alquimia, Magia Arcana, Teleporte
+  GET /story_log?npc_name=Eldrin,%20o%20Mago -> Status HTTP: 200 | Registros: 0
